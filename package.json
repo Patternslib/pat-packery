@@ -1,0 +1,20 @@
+{
+    "name": "pat-packery",
+    "version": "1.0.0",
+    "title": "Patternslib plugin for Packery",
+    "licences": [
+        {"type": "BSD", "URL": "LICENSE"}
+    ],
+    "devDependencies": {
+        "bower": "latest",
+        "requirejs": ""
+    },
+    "homepage": "https://gitub.com/Patternslib/pat-packery",
+    "maintainers": [
+        {
+	    "name": "Wichert Akkerman",
+	    "email": "wichert@wiggy.net",
+	    "url": "http://www.wiggy.net"
+	}
+    ]
+}
