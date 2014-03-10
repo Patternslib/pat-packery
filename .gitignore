@@ -1,3 +1,4 @@
+*.swp
 /bower_components
+/dist
 /node_modules
-/pat-packaery.js
