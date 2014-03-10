@@ -15,7 +15,7 @@ gulp.task("default", function() {
 	bower_files(),
 	gulp.src("src/*.js")
     )
-    	.pipe(concat("bundle.js"))
+    	.pipe(concat("pat-packery.js"))
     	.pipe(gulp.dest("./dist/"))
         .pipe(rename({suffix: '.min'}))
 	.pipe(uglify({outSourceMap: true}))
