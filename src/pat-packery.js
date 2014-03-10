@@ -10,7 +10,7 @@
             return factory($, registry, Parser, imagesLoaded, Packery);
         });
     } else {
-        factory(root.jQuery, root.patterns, root.patterns.parser, root.imagesLoaded, root.packery);
+        factory(root.jQuery, root.patterns, root.patterns.Parser, root.imagesLoaded, root.packery);
     }
 }(this, function($, registry, Parser, imagesLoaded, Packery) {
     var parser = new Parser("packery");
