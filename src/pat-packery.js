@@ -10,9 +10,7 @@
             return factory($, registry, Parser, imagesLoaded, Packery);
         });
     } else {
-	    setTimeout(function() {
         factory(root.jQuery, root.patterns, root.patterns.Parser, root.imagesLoaded, root.Packery);
-	    }, 5);
     }
 }(this, function($, registry, Parser, imagesLoaded, Packery) {
     var parser = new Parser("packery");
