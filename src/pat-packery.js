@@ -2,13 +2,17 @@
  * Basic pattern for packery
  * Copyright 2013-2014 Simplon B.V. - Wichert Akkerman
  */
-define([
-    "jquery",
-    "pat-registry",
-    "pat-parser",
-    "imagesloaded",
-    "packery"
-], function($, registry, Parser, imagesLoaded, Packery) {
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery', 'pat-registry', 'pat-parser', 'imagesloaded', 'packery' ], function ($, registry, Parser, imagesLoaded, Packery) {
+            return factory($, registry, Parser, imagesLoaded, Packery);
+        });
+    } else {
+        factory(root.jQuery, root.patterns, root.patterns.parser, root.imagesLoaded, root.packery);
+    }
+}(this, function($, registry, Parser, imagesLoaded, Packery) {
     var parser = new Parser("packery");
 
     parser.add_argument("item-selector", ".item");
@@ -93,6 +97,6 @@ define([
 
     registry.register(packery);
     return packery;
-});
+}));
 
 
