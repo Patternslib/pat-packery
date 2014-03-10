@@ -11635,6 +11635,98 @@ define('pat-parser',[
 // jshint indent: 4, browser: true, jquery: true, quotmark: double
 // vim: sw=4 expandtab
 ;
+/**
+ * Patterns store - store pattern state locally in the browser
+ *
+ * Copyright 2008-2012 Simplon B.V.
+ * Copyright 2011 Humberto Sermeño
+ * Copyright 2011 Florian Friesdorf
+ */
+define('pat-store',[],function() {
+    function Storage(backend, prefix) {
+        this.prefix=prefix;
+        this.backend=backend;
+    }
+
+    Storage.prototype._key = function(name) {
+        return this.prefix + ":" + name;
+    };
+
+    Storage.prototype._allKeys = function() {
+        var keys = [],
+            prefix = this.prefix + ":",
+            prefix_length = prefix.length,
+            key, i;
+
+        for (i=0; i<this.backend.length; i++) {
+            key=this.backend.key(i);
+            if (key.slice(0, prefix_length)===prefix)
+                keys.push(key);
+        }
+        return keys;
+    };
+
+    Storage.prototype.get = function(name) {
+        var key = this._key(name),
+            value = this.backend.getItem(key);
+        if (value!==null)
+            value=JSON.parse(value);
+        return value;
+    };
+
+    Storage.prototype.set = function(name, value) {
+        var key = this._key(name);
+        return this.backend.setItem(key, JSON.stringify(value));
+    };
+
+    Storage.prototype.remove = function(name) {
+        var key = this._key(name);
+        return this.backend.removeItem(key);
+    };
+
+    Storage.prototype.clear = function() {
+        var keys = this._allKeys();
+        for (var i=0; i<keys.length; i++)
+            this.backend.removeItem(keys[i]);
+    };
+
+    Storage.prototype.all = function() {
+        var keys = this._allKeys(),
+            prefix_length = this.prefix.length + 1,
+            lk,
+            data = {};
+
+        for (var i=0; i<keys.length; i++) {
+            lk = keys[i].slice(prefix_length);
+            data[lk]=JSON.parse(this.backend.getItem(keys[i]));
+        }
+        return data;
+    };
+
+    var store = {
+        supported: false,
+
+        local: function (name) {
+            return new Storage(window.localStorage, name);
+        },
+
+        session: function (name) {
+            return new Storage(window.sessionStorage, name);
+        }
+    };
+
+    // Perform the test separately since this may throw a SecurityError as
+    // reported in #326
+    try {
+        store.supported=typeof window.sessionStorage !== 'undefined';
+    } catch(e) {
+    }
+
+    return store;
+});
+
+// vim: sw=4 expandtab
+;
 /*
  * HTML Parser By John Resig (ejohn.org)
  * Original code by Erik Arvidsson, Mozilla Public License
@@ -17005,98 +17097,6 @@ define('pat-inject',[
 });
 
 // jshint indent: 4, browser: true, jquery: true, quotmark: double
-// vim: sw=4 expandtab
-;
-/**
- * Patterns store - store pattern state locally in the browser
- *
- * Copyright 2008-2012 Simplon B.V.
- * Copyright 2011 Humberto Sermeño
- * Copyright 2011 Florian Friesdorf
- */
-define('pat-store',[],function() {
-    function Storage(backend, prefix) {
-        this.prefix=prefix;
-        this.backend=backend;
-    }
-
-    Storage.prototype._key = function(name) {
-        return this.prefix + ":" + name;
-    };
-
-    Storage.prototype._allKeys = function() {
-        var keys = [],
-            prefix = this.prefix + ":",
-            prefix_length = prefix.length,
-            key, i;
-
-        for (i=0; i<this.backend.length; i++) {
-            key=this.backend.key(i);
-            if (key.slice(0, prefix_length)===prefix)
-                keys.push(key);
-        }
-        return keys;
-    };
-
-    Storage.prototype.get = function(name) {
-        var key = this._key(name),
-            value = this.backend.getItem(key);
-        if (value!==null)
-            value=JSON.parse(value);
-        return value;
-    };
-
-    Storage.prototype.set = function(name, value) {
-        var key = this._key(name);
-        return this.backend.setItem(key, JSON.stringify(value));
-    };
-
-    Storage.prototype.remove = function(name) {
-        var key = this._key(name);
-        return this.backend.removeItem(key);
-    };
-
-    Storage.prototype.clear = function() {
-        var keys = this._allKeys();
-        for (var i=0; i<keys.length; i++)
-            this.backend.removeItem(keys[i]);
-    };
-
-    Storage.prototype.all = function() {
-        var keys = this._allKeys(),
-            prefix_length = this.prefix.length + 1,
-            lk,
-            data = {};
-
-        for (var i=0; i<keys.length; i++) {
-            lk = keys[i].slice(prefix_length);
-            data[lk]=JSON.parse(this.backend.getItem(keys[i]));
-        }
-        return data;
-    };
-
-    var store = {
-        supported: false,
-
-        local: function (name) {
-            return new Storage(window.localStorage, name);
-        },
-
-        session: function (name) {
-            return new Storage(window.sessionStorage, name);
-        }
-    };
-
-    // Perform the test separately since this may throw a SecurityError as
-    // reported in #326
-    try {
-        store.supported=typeof window.sessionStorage !== 'undefined';
-    } catch(e) {
-    }
-
-    return store;
-});
-
 // vim: sw=4 expandtab
 ;
 /**
@@ -44158,6 +44158,9 @@ define('patterns',[
     "jquery",
     "pat-registry",
     "pat-parser",
+    "pat-store",
+    "pat-utils",
+    "pat-logger",
     "pat-htmlparser",
 
     "pat-ajax",
@@ -44198,7 +44201,6 @@ define('patterns',[
     "pat-slideshow-builder",
     "pat-sortable",
     "pat-stacks",
-    "pat-store",
     "pat-subform",
     "pat-switch",
     "pat-toggle",
@@ -44206,8 +44208,17 @@ define('patterns',[
     "pat-validate",
     "pat-zoom",
     "pat-url"
-], function($, registry) {
+], function($, registry, Parser, store, utils, logger) {
+
+    // Since we are in a non-AMD env, register a few useful utilites
+
+    registry.Parser = Parser;
+    registry.store = store;
+    registry.utils = utils;
+    registry.logger = logger;
+
     window.patterns = registry;
+
     $(function () {
         registry.init();
     });
@@ -44215,3 +44226,4 @@ define('patterns',[
 });
 
 require(["patterns"]);
+window.define=undefined;
