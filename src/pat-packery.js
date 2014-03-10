@@ -6,8 +6,9 @@ define([
     "jquery",
     "pat-registry",
     "pat-parser",
+    "imagesloaded",
     "packery"
-], function($, registry, Parser, imagesLoaded) {
+], function($, registry, Parser, imagesLoaded, Packery) {
     var parser = new Parser("packery");
 
     parser.add_argument("item-selector", ".item");
