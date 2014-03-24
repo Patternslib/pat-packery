@@ -6,13 +6,13 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['jquery', 'pat-registry', 'pat-parser', 'imagesloaded', 'packery' ], function ($, registry, Parser, imagesLoaded, Packery) {
-            return factory($, registry, Parser, imagesLoaded, Packery);
+        define(['jquery', 'pat-registry', 'pat-parser', 'imagesloaded', 'get-size/get-size', 'packery' ], function ($, registry, Parser, imagesLoaded, getSize, Packery) {
+            return factory($, registry, Parser, imagesLoaded, getSize, Packery);
         });
     } else {
-        factory(root.jQuery, root.patterns, root.patterns.Parser, root.imagesLoaded, root.Packery);
+        factory(root.jQuery, root.patterns, root.patterns.Parser, root.imagesLoaded, root.getSize, root.Packery);
     }
-}(this, function($, registry, Parser, imagesLoaded, Packery) {
+}(this, function($, registry, Parser, imagesLoaded, getSize, Packery) {
     var parser = new Parser("packery");
 
     parser.add_argument("item-selector", ".item");
